@@ -30,7 +30,7 @@ def main():
         # Analyze sentiments
         chapter_sentiment = analyze_sentiment(chapter)
         possentiments.append((i+1, chapter_sentiment['pos']))
-        negsentiments.append((i+1, chapter_sentiment['neg'] * -1))
+        negsentiments.append((i+1, chapter_sentiment['neg']))
         # sentiments.append((i+2, chapter_sentiment['neg']))
     
     # Convert to DataFrame for analysis
@@ -42,8 +42,8 @@ def main():
 
 
     # # Calculate percentages for plotting
-    sentiment_df['Average'] = sentiment_df['Positive Sentiment'] + sentiment_df['Negative Sentiment']
-    sentiment_df['Total % Emotional Words'] = sentiment_df['Positive Sentiment'] - sentiment_df['Negative Sentiment']
+    sentiment_df['Average'] = sentiment_df['Positive Sentiment'] - sentiment_df['Negative Sentiment']
+    sentiment_df['Total Sentiment'] = sentiment_df['Positive Sentiment'] + sentiment_df['Negative Sentiment']
     # sentiment_df['Positive Percent'] = sentiment_df['Positive Sentiment'] / sentiment_df['Total']
     # sentiment_df['Negative Percent'] = sentiment_df['Negative Sentiment'] / sentiment_df['Total']
 
@@ -54,7 +54,7 @@ def main():
     sns.lineplot(data=sentiment_df, x='Chapter', y='Average', marker='o', label='Average Sentiment', ax=ax)
     # Plot stacked bars
     ax.bar(sentiment_df['Chapter'], sentiment_df['Positive Sentiment'], color='lightblue', label='Positive Sentiment')
-    ax.bar(sentiment_df['Chapter'], sentiment_df['Negative Sentiment'], color='lightcoral', label='Negative Sentiment')
+    ax.bar(sentiment_df['Chapter'], sentiment_df['Negative Sentiment']*-1, color='lightcoral', label='Negative Sentiment')
 
     # Set labels and title
     ax.set_title('Sentiment Analysis of Each Chapter')
@@ -72,10 +72,88 @@ def main():
     st.pyplot(fig)
 
 
+    sentiment_df = sentiment_df.sort_values(by='Total Sentiment', ascending=False)
+    # Create a Streamlit app
+    st.subheader('Sentiment Analysis of Each Chapter')
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot horizontal stacked bars
+    bars1 = ax.barh(sentiment_df['Chapter'], sentiment_df['Positive Sentiment'], color='lightblue', label='Positive Sentiment')
+    bars2 = ax.barh(sentiment_df['Chapter'], sentiment_df['Negative Sentiment'], color='lightcoral', label='Negative Sentiment', left=sentiment_df['Positive Sentiment'])
+
+    # Set labels and title
+    ax.set_title('Sentiment Analysis of Each Chapter')
+    ax.set_ylabel('Chapter')
+    ax.set_xlabel('Sentiment Score (%)')
+    ax.axvline(x=0, color='gray', linestyle='--')  # Add a vertical line at x=0
+
+    # Format x-axis as percentage
+    ax.xaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1))
+
+    # Add percentage labels on the bars
+    # for bar in bars1:
+    #     width = bar.get_width()
+    #     ax.annotate(f'{width:.0%}', xy=(width, bar.get_y() + bar.get_height() / 2), 
+    #                 xytext=(3, 0), textcoords='offset points', ha='left', va='center')
+
+    # for bar in bars2:
+    #     width = bar.get_width()
+    #     ax.annotate(f'{width:.0%}', xy=(width + sentiment_df.loc[bar.get_y(), 'Positive Sentiment'], bar.get_y() + bar.get_height() / 2), 
+    #                 xytext=(-3, 0), textcoords='offset points', ha='right', va='center')
+
+    # Show legend and grid
+    ax.legend()
+    ax.grid(True)
+
+    # Display the plot in Streamlit
+    st.pyplot(fig)
+
+    
+    ## Grouped Bar Chart - % pos neg chapter emotions
+    st.subheader('Sentiment Analysis of Each Chapter')
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Plot grouped bar chart
+    bar_width = 0.4  # Width of each bar
+    chapter_indices = sentiment_df['Chapter']
+    bar_positions = [ind + 1 for ind in range(len(chapter_indices))]
+
+    # Plot bars for Positive Sentiment
+    ax.bar([p - bar_width/2 for p in bar_positions], sentiment_df['Positive Sentiment'], width=bar_width, color='lightblue', label='Positive Sentiment')
+
+    # Plot bars for Negative Sentiment
+    ax.bar([p + bar_width/2 for p in bar_positions], sentiment_df['Negative Sentiment'], width=bar_width, color='lightcoral', label='Negative Sentiment')
+
+    # Set labels and title
+    ax.set_title('Sentiment Analysis of Each Chapter')
+    ax.set_xlabel('Chapter')
+    ax.set_ylabel('Sentiment Score (%)')
+    ax.axhline(y=0, color='gray', linestyle='--')  # Add a horizontal line at y=0
+
+    # Format y-axis as percentage
+    ax.yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1))
+
+    # Adjust x-axis ticks and labels
+    ax.set_xticks(bar_positions)
+    ax.set_xticklabels(chapter_indices)
+
+    # Show legend and grid
+    ax.legend()
+    ax.grid(True)
+
+    # Display the plot in Streamlit
+    st.pyplot(fig)
+
+
+
+
+
+
+
 
     st.subheader('Total % Emotional Words')
     fig, ax = plt.subplots(figsize=(10, 6))
-    sns.lineplot(data=sentiment_df, x='Chapter', y='Total % Emotional Words', marker='o', label='Average Sentiment', ax=ax)
+    sns.lineplot(data=sentiment_df, x='Chapter', y='Total Sentiment', marker='o', label='Average Sentiment', ax=ax)
     ax.set_title('Total % Emotional Words of Each Chapter')
     ax.set_xlabel('Chapter')
     ax.set_ylabel('% Emotion')
