@@ -118,7 +118,7 @@ def main():
     y_max = (np.ceil(sentiment_df['Total Sentiment'].max() * 100) / 100) + .01
     ax.set_ylim(y_min, y_max)
     # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%d'))
-    ax.yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1))
+    ax.yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1, decimals=0))
     ax.set_xticks(sentiment_df['Chapter'])
 
     # Add value labels to bars without the percentage symbol
