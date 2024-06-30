@@ -96,7 +96,6 @@ def main():
 
 
 # Graph 3 ###########################################################
-
     bound = max(abs(sentiment_df['Average'].min()), abs(sentiment_df['Average'].max()))
 
     st.subheader('% Emotional Words By Chapter')
@@ -118,6 +117,7 @@ def main():
     y_min = (np.floor(sentiment_df['Total Sentiment'].min() * 100) / 100) - .01
     y_max = (np.ceil(sentiment_df['Total Sentiment'].max() * 100) / 100) + .01
     ax.set_ylim(y_min, y_max)
+    # ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%d'))
     ax.yaxis.set_major_formatter(mpl.ticker.PercentFormatter(xmax=1))
     ax.set_xticks(sentiment_df['Chapter'])
 
@@ -128,13 +128,15 @@ def main():
 
     # Create a colorbar as a legend without metrics
     cbar = fig.colorbar(sm, ax=ax)
-    cbar.set_label('Majority: Positive vs. Negative')
+    cbar.set_label('Majority Emotion')
     cbar.ax.get_yaxis().set_ticks([])  # Remove the colorbar metrics
+
+    # Custom tick labels for colorbar
+    cbar.set_ticks([-bound, 0, bound])  # Example positions for the labels
+    cbar.set_ticklabels(['Negative', 'Equal %', 'Positive'])
 
     # Display the plot in Streamlit
     st.pyplot(fig)
-
-
 
 # Graph 4 ###########################################################
 
